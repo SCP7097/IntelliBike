@@ -19,6 +19,9 @@ typedef struct node{
     struct node* next;
 } node;
 
+int max_node = 3;
+node* head = NULL;
+
 static void push(node** head, float dist);
 static void pop_first(node** head);
 static int check_full(node* head, int max_node);
@@ -30,8 +33,6 @@ static int compare(const void* a, const void* b) {
 }
 
 void setup() {
-    int max_node = 3;
-    node* head = NULL;
     Serial.begin(9600);
     dht.begin();  // init dht sensor
     pinMode(Trig, OUTPUT);
@@ -80,11 +81,11 @@ void loop() {
     }
     OLED.clearDisplay();
     OLED.setCursor(0,0);
-    OLED.print(distance);
+    OLED.print(norm_distance);
     OLED.setCursor(0,20);
     OLED.print(T);
     OLED.setCursor(0,10);
-    OLED.print(distance);
+    OLED.print(norm_distance);
     OLED.display();
 }
 
@@ -143,10 +144,12 @@ static float find_median(node* head, int max_node){
         current = current->next;
     }
     qsort(distp,n,sizeof(float), compare);
+    float median;
     if (n % 2 != 0) {
-        return distp[n / 2];
+        median = distp[n / 2];
     } else {
-        return (distp[n / 2 - 1] + distp[n / 2]) / 2.0f;
+        median = (distp[n / 2 - 1] + distp[n / 2]) / 2.0f;
     }
     free(distp);
+    return median;
 }
