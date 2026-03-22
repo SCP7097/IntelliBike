@@ -22,12 +22,12 @@ typedef struct node{
 int max_node = 3;
 node* head = NULL;
 
-static void push(node** head, float dist);
-static void pop_first(node** head);
-static int check_full(node* head, int max_node);
-static void print_list(node* head);
-static float find_median(node* head, int max_node);
-static int compare(const void* a, const void* b) {
+void push(node** head, float dist);
+void pop_first(node** head);
+int check_full(node* head, int max_node);
+void print_list(node* head);
+float find_median(node* head, int max_node);
+int compare(const void* a, const void* b) {
     float fa = *(const float*)a, fb = *(const float*)b;
     return (fa > fb) - (fa < fb);
 }
@@ -53,11 +53,8 @@ void loop() {
     digitalWrite(Trig,HIGH);
     delayMicroseconds(10);
     digitalWrite(Trig,LOW);
-
     float t = pulseIn(Echo, HIGH);  // 往返时间（μs）
-
     float norm_distance = ((331.4+0.607*T)*0.000001*t)/2 * 100; //distance normalized using temperature
-
     push(&head, norm_distance);
     if(check_full(head, max_node)){
         pop_first(&head);
@@ -67,13 +64,12 @@ void loop() {
     Serial.print("距离: ");
     Serial.print(find_median(head,max_node));
     Serial.println(" cm");
-
-    if (norm_distance<50.0){
+    if (norm_distance < 50.0){
         digitalWrite(D,LOW);
         delay(100);
         digitalWrite(D,HIGH);
         delay(100);}
-    if (norm_distance<25){
+    if (norm_distance < 25){
         digitalWrite(D,LOW);
         delay(10);
         digitalWrite(D,HIGH);
@@ -89,7 +85,7 @@ void loop() {
     OLED.display();
 }
 
-static void push(node** head, float dist){
+void push(node** head, float dist){
     //in this implementation for intellibike we push to the end so that in the sliding window the values are organized
     node* new_node = (node*)malloc(sizeof(node));
     new_node->dist = dist;
@@ -104,13 +100,13 @@ static void push(node** head, float dist){
     }//cycle to last
     current->next = new_node;
 }
-static void pop_first(node** head) {
+void pop_first(node** head) {
     if (*head == NULL) return;
     node* old_head = *head;
     *head = (*head)->next;
     free(old_head);
 }
-static int check_full(node* head, int max_node){
+int check_full(node* head, int max_node){
     node* current = head;
     int nnode = 0;
     while (current != NULL){
@@ -122,7 +118,7 @@ static int check_full(node* head, int max_node){
     }
     return 0;
 }
-static void print_list(node* head){
+void print_list(node* head){
     node* current = head;
     while(current != NULL){
         printf("%f meters\n", current->dist);
@@ -130,7 +126,7 @@ static void print_list(node* head){
     }
 }
 
-static float find_median(node* head, int max_node){
+float find_median(node* head, int max_node){
     if (head == NULL){
         return 0.0f; // should prob fix this but not sure how rendering works
     }
